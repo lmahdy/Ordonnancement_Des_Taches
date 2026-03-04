@@ -1,5 +1,5 @@
 """
-Streamlit Dashboard - Compare GA, SA, ACO, TABU scheduling results.
+Streamlit Dashboard - Compare GA, SA, ACO, TABU, HH scheduling results.
 
 Usage:
     cd NEWPROJECT
@@ -15,7 +15,7 @@ import numpy as np
 
 RESULTS_DIR = Path(__file__).parent / "results"
 
-ALGO_COLORS = {'GA': '#2ecc71', 'SA': '#3498db', 'ACO': '#e74c3c', 'TABU': '#9b59b6'}
+ALGO_COLORS = {'GA': '#2ecc71', 'SA': '#3498db', 'ACO': '#e74c3c', 'TABU': '#9b59b6', 'HH': '#f39c12'}
 
 
 def load_comparison():
@@ -36,7 +36,7 @@ def main():
     st.title("Ordonnancement des Taches - Comparaison des Algorithmes")
     st.markdown("**Genetic Algorithm (GA)** vs **Simulated Annealing (SA)** "
                 "vs **Ant Colony Optimization (ACO)** vs **Tabu Search (TABU)** "
-                "on **1000 tasks**")
+                "vs **Hyper-Heuristic (HH)** on **1000 tasks**")
 
     results = load_comparison()
     if results is None:
@@ -154,7 +154,7 @@ def main():
     # ==================== GANTT CHARTS ====================
     st.header("Diagrammes de Gantt")
 
-    for name in ['ga', 'sa', 'aco', 'tabu']:
+    for name in ['ga', 'sa', 'aco', 'tabu', 'hh']:
         img_path = RESULTS_DIR / f"{name}_gantt.png"
         if img_path.exists():
             st.subheader(f"{name.upper()} - Diagramme de Gantt")
@@ -170,7 +170,7 @@ def main():
 
     # ==================== FOOTER ====================
     st.markdown("---")
-    st.markdown("*Projet d'Ordonnancement des Taches - Comparaison GA vs SA vs ACO vs TABU*")
+    st.markdown("*Projet d'Ordonnancement des Taches - Comparaison GA vs SA vs ACO vs TABU vs HH*")
 
 
 if __name__ == '__main__':

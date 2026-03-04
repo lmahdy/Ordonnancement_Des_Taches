@@ -1,7 +1,7 @@
 {
   "algorithm": "SA",
   "makespan": 37212,
-  "runtime": 15.69,
+  "runtime": 16.01,
   "convergence": [
     48953,
     48953,

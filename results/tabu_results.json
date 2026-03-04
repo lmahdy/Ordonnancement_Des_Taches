@@ -1,7 +1,7 @@
 {
   "algorithm": "TABU",
   "makespan": 32238,
-  "runtime": 80.16,
+  "runtime": 81.38,
   "convergence": [
     48953,
     48458,

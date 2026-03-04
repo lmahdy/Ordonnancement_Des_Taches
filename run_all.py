@@ -1,5 +1,5 @@
 """
-Run all four scheduling algorithms (GA, SA, ACO, TABU) on tasks1000.json
+Run all five scheduling algorithms (GA, SA, ACO, TABU, HH) on tasks1000.json
 and save results + Gantt charts for the dashboard.
 
 Usage:
@@ -16,6 +16,7 @@ from ga import run_ga
 from sa import run_sa
 from aco import run_aco
 from tabu import run_tabu
+from hh import run_hh
 
 
 DATA_DIR = Path(__file__).parent
@@ -39,6 +40,7 @@ def main():
         ("SA", run_sa),
         ("ACO", run_aco),
         ("TABU", run_tabu),
+        ("HH", run_hh),
     ]
 
     all_results = {}

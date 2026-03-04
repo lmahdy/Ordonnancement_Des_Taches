@@ -1,10 +1,10 @@
-# Ordonnancement des Taches - Comparaison GA vs SA vs ACO vs TABU
+# Ordonnancement des Taches - Comparaison GA vs SA vs ACO vs TABU vs HH
 
-Projet de comparaison de **4 algorithmes metaheuristiques** pour le **Job-Shop Scheduling Problem** (ordonnancement des taches) sur un jeu de **1000 taches** et **10 machines**.
+Projet de comparaison de **5 algorithmes metaheuristiques** pour le **Job-Shop Scheduling Problem** (ordonnancement des taches) sur un jeu de **1000 taches** et **10 machines**.
 
 ---
 
-## Les 4 Algorithmes
+## Les 5 Algorithmes
 
 | Algorithme | Fichier | Comment ca marche (explication simple) |
 |------------|---------|---------------------------------------|
@@ -12,6 +12,7 @@ Projet de comparaison de **4 algorithmes metaheuristiques** pour le **Job-Shop S
 | **SA** (Recuit Simule) | `sa.py` | Imite le refroidissement d'un metal : au debut on accepte meme des solutions moins bonnes (pour explorer), puis au fur et a mesure que la "temperature" baisse, on n'accepte plus que les ameliorations. |
 | **ACO** (Colonie de Fourmis) | `aco.py` | Imite les fourmis qui cherchent de la nourriture : chaque fourmi construit une solution, les bonnes solutions laissent plus de "pheromones" pour guider les fourmis suivantes. |
 | **TABU** (Recherche Tabou) | `tabu.py` | Explore les voisins de la solution actuelle (en echangeant des taches), mais interdit de revenir aux solutions recemment visitees (liste tabou) pour eviter de tourner en rond. |
+| **HH** (Hyper-Heuristique) | `hh.py` | Un algorithme qui choisit automatiquement la meilleure strategie parmi plusieurs (swap, reverse, shift). Il apprend au fil du temps quelle heuristique marche le mieux et l'utilise plus souvent. |
 
 ---
 
@@ -24,7 +25,8 @@ NEWPROJECT/
   sa.py             # Recuit Simule
   aco.py            # Colonie de Fourmis
   tabu.py           # Recherche Tabou
-  run_all.py        # Lance les 4 algorithmes et sauvegarde les resultats
+  hh.py             # Hyper-Heuristique
+  run_all.py        # Lance les 5 algorithmes et sauvegarde les resultats
   dashboard.py      # Dashboard Streamlit pour visualiser et comparer
   machines.json     # Donnees des 10 machines
   tasks1000.json    # Donnees des 1000 taches
@@ -43,7 +45,7 @@ pip install -r requirements.txt
 
 ## Utilisation
 
-### Etape 1 : Lancer les 4 algorithmes
+### Etape 1 : Lancer les 5 algorithmes
 
 ```bash
 cd NEWPROJECT
@@ -52,7 +54,7 @@ python run_all.py
 
 Cela va :
 - Charger `tasks1000.json` (1000 taches) et `machines.json` (10 machines)
-- Executer GA, SA, ACO, et TABU sur les 1000 taches
+- Executer GA, SA, ACO, TABU, et HH sur les 1000 taches
 - Sauvegarder les resultats JSON + diagrammes de Gantt dans `results/`
 
 ### Etape 2 : Ouvrir le Dashboard
@@ -86,7 +88,7 @@ Deux graphiques cote a cote :
 - **Barres horizontales** : montre le makespan de chaque algorithme en heures,
   ce qui permet de comparer visuellement les ecarts.
 - **Pourcentages d'amelioration** : montre combien chaque algorithme
-  fait mieux que le pire resultat. Exemple : "+22%" veut dire 22% meilleur
+  fait mieux que le pire resultat. Exemple : "+33%" veut dire 33% meilleur
   que le pire algorithme.
 
 ### 4. Courbes de Convergence
@@ -95,8 +97,8 @@ Ce graphique montre **comment chaque algorithme ameliore sa solution au fil du t
 - L'axe Y = le meilleur makespan trouve jusqu'a ce point
 - Une courbe qui descend vite = l'algorithme converge rapidement
 - Une courbe plate = l'algorithme stagne (n'arrive plus a ameliorer)
-- On peut voir que SA descend progressivement, GA descend par paliers,
-  ACO descend peu, et TABU explore activement.
+- SA descend progressivement, GA descend par paliers, TABU descend regulierement,
+  HH descend vite au debut, ACO descend peu.
 
 ### 5. Diagrammes de Gantt
 Pour **chaque algorithme**, un planning visuel montrant :
@@ -168,6 +170,20 @@ taux de mutation, temperature, etc.)
 - **Liste tabou** : Les 15 derniers swaps (i,j) effectues sont interdits pour eviter de boucler
 - **Aspiration** : Si un mouvement tabou donne un resultat meilleur que le record global, il est quand meme accepte
 
+### HH - Hyper-Heuristique (`hh.py`)
+
+| Parametre | Valeur | Explication |
+|-----------|--------|-------------|
+| `iterations` | 500 | Nombre total d'iterations |
+| `seed` | 42 | Graine aleatoire pour reproductibilite |
+
+- **3 heuristiques bas-niveau** :
+  - **swap** : echange 2 taches aleatoires
+  - **reverse** : inverse un petit segment de l'ordre (2 a 8 taches)
+  - **shift** : retire une tache et la reinserere ailleurs
+- **Selection adaptative** : chaque heuristique a un score. Si elle ameliore la solution, son score augmente et elle est choisie plus souvent. Sinon, son score diminue.
+- **Resultat** : l'algorithme apprend automatiquement que "shift" et "swap" marchent mieux que "reverse" pour ce probleme.
+
 ---
 
 ## Comparaison Finale : Quel est le meilleur algorithme ?
@@ -176,16 +192,19 @@ Apres execution sur 1000 taches, voici les resultats :
 
 | Rang | Algorithme | Makespan | Heures | Runtime | Forces | Faiblesses |
 |------|-----------|----------|--------|---------|--------|------------|
-| 1 | **TABU** | 32,238 min | 537h | 80.2s | Meilleur makespan, exploration locale efficace, evite les cycles | Plus lent (plus de calculs par iteration) |
-| 2 | **SA** | 37,212 min | 620h | 15.7s | Tres bon makespan, rapide, bon equilibre exploration/exploitation | Resultat depend du refroidissement |
-| 3 | **GA** | 43,869 min | 731h | 23.5s | Bonne diversite, amelioration continue par generations | Besoin de plus de generations pour converger |
-| 4 | **ACO** | 47,978 min | 800h | 208.2s | Resultat ameliore avec 30 fourmis, inspire de la nature | Le plus lent, convergence limitee sur grands problemes |
+| 1 | **TABU** | 32,238 min | 537h | 81.4s | Meilleur makespan, exploration locale efficace, evite les cycles | Plus lent (20 voisins par iteration) |
+| 2 | **SA** | 37,212 min | 620h | 16.0s | Tres bon makespan, rapide, bon equilibre exploration/exploitation | Resultat depend du refroidissement |
+| 3 | **HH** | 42,373 min | 706h | 4.0s | Le plus rapide, apprend quelle strategie marche le mieux | N'explore pas assez en profondeur |
+| 4 | **GA** | 43,869 min | 731h | 23.5s | Bonne diversite, amelioration continue par generations | Besoin de plus de generations pour converger |
+| 5 | **ACO** | 47,978 min | 800h | 212.8s | Inspire de la nature, resultat ameliore avec 30 fourmis | Le plus lent, convergence limitee sur grands problemes |
 
 **Conclusion** : La Recherche Tabou (TABU) donne le meilleur makespan (32,238 min)
-car elle explore methodiquement les voisins a chaque iteration et sa liste tabou
+car elle explore methodiquement 20 voisins a chaque iteration et sa liste tabou
 l'empeche de tourner en rond. Le Recuit Simule (SA) arrive en 2eme position
-avec un bon compromis qualite/rapidite. Le GA converge lentement mais regulierement.
-L'ACO est le plus rapide mais donne le moins bon resultat sur 1000 taches.
+avec un bon compromis qualite/rapidite. L'Hyper-Heuristique (HH) est tres rapide
+(4 secondes) et arrive 3eme en apprenant quelle strategie utiliser. Le GA converge
+regulierement mais lentement. L'ACO avec 30 fourmis est le plus lent et donne
+le moins bon resultat sur 1000 taches.
 
 ---
 
@@ -199,11 +218,13 @@ Apres execution, le dossier `results/` contient :
 | `sa_results.json` | Resultats detailles du SA |
 | `aco_results.json` | Resultats detailles de l'ACO |
 | `tabu_results.json` | Resultats detailles du TABU |
-| `comparison.json` | Resume comparatif des 4 algorithmes |
+| `hh_results.json` | Resultats detailles de l'HH |
+| `comparison.json` | Resume comparatif des 5 algorithmes |
 | `ga_gantt.png` | Diagramme de Gantt du GA |
 | `sa_gantt.png` | Diagramme de Gantt du SA |
 | `aco_gantt.png` | Diagramme de Gantt de l'ACO |
 | `tabu_gantt.png` | Diagramme de Gantt du TABU |
+| `hh_gantt.png` | Diagramme de Gantt de l'HH |
 
 ## Donnees d'entree
 

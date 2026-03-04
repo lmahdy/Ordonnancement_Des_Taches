@@ -1,7 +1,7 @@
 {
   "algorithm": "GA",
   "makespan": 43869,
-  "runtime": 23.46,
+  "runtime": 23.54,
   "convergence": [
     48397,
     48022,
