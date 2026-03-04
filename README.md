@@ -186,6 +186,54 @@ taux de mutation, temperature, etc.)
 
 ---
 
+## Complexite Algorithmique
+
+Variables utilisees :
+- **n** = nombre de taches (1000 dans notre cas)
+- **m** = nombre moyen d'operations par tache (~5)
+- **P** = taille de la population (GA)
+- **K** = nombre de fourmis (ACO)
+- **V** = nombre de voisins par iteration (TABU)
+- **I** = nombre d'iterations
+
+### Complexite temporelle (par iteration)
+
+| Algorithme | Complexite par iteration | Complexite totale | Explication |
+|------------|-------------------------|-------------------|-------------|
+| **GA** | O(P * n * m) | O(I * P * n * m) | A chaque generation : P individus a evaluer, chacun necessite un decodage en O(n*m) plus crossover O(n) et reparation O(n) |
+| **SA** | O(n * m) | O(I * n * m) | A chaque iteration : 1 swap O(1), 1 reparation O(n), 1 decodage O(n*m). Le plus simple. |
+| **ACO** | O(K * n^2) | O(I * K * n^2) | Chaque fourmi construit une solution en n etapes. A chaque etape, elle calcule les probabilites sur les taches disponibles. Plus le decodage O(n*m). |
+| **TABU** | O(V * n * m) | O(I * V * n * m) | A chaque iteration : V voisins generes, chacun necessite reparation O(n) + decodage O(n*m). |
+| **HH** | O(n * m) | O(I * n * m) | A chaque iteration : 1 heuristique appliquee O(n), 1 reparation O(n), 1 decodage O(n*m). Similaire a SA. |
+
+### Complexite spatiale (memoire)
+
+| Algorithme | Memoire | Explication |
+|------------|---------|-------------|
+| **GA** | O(P * n) | Stocke P solutions de taille n (la population entiere) |
+| **SA** | O(n) | Stocke seulement 2 solutions : la courante et la meilleure |
+| **ACO** | O(n + K * n) | Pheromones O(n) + K solutions construites par iteration |
+| **TABU** | O(n + T) | Solution courante O(n) + liste tabou de taille T |
+| **HH** | O(n) | Stocke seulement 2 solutions : la courante et la meilleure |
+
+### Avec nos parametres (n=1000, m=5)
+
+| Algorithme | Operations par iteration | Total operations | Memoire |
+|------------|------------------------|-----------------|---------|
+| **GA** | 30 * 1000 * 5 = 150,000 | 100 * 150,000 = **15 M** | 30 * 1000 = 30K entiers |
+| **SA** | 1000 * 5 = 5,000 | 2000 * 5,000 = **10 M** | 2 * 1000 = 2K entiers |
+| **ACO** | 30 * 1000^2 = 30,000,000 | 100 * 30,000,000 = **3 G** | 30 * 1000 = 30K entiers |
+| **TABU** | 20 * 1000 * 5 = 100,000 | 500 * 100,000 = **50 M** | 1000 + 15 = ~1K entiers |
+| **HH** | 1000 * 5 = 5,000 | 500 * 5,000 = **2.5 M** | 2 * 1000 = 2K entiers |
+
+**Observations** :
+- **HH et SA** ont la complexite la plus basse (O(I * n * m)), ce qui explique qu'ils sont les plus rapides
+- **ACO** a la complexite la plus haute (O(I * K * n^2)) a cause de la construction de solution par chaque fourmi, ce qui explique qu'il est le plus lent (212s)
+- **TABU** a une complexite moderee mais explore plus de voisins, ce qui lui permet de trouver de meilleures solutions
+- **GA** a une complexite moderee aussi, mais le crossover et la gestion de population ajoutent du surcoput
+
+---
+
 ## Comparaison Finale : Quel est le meilleur algorithme ?
 
 Apres execution sur 1000 taches, voici les resultats :
