@@ -111,16 +111,75 @@ taux de mutation, temperature, etc.)
 
 ---
 
+## Configuration de chaque algorithme
+
+### GA - Algorithme Genetique (`ga.py`)
+
+| Parametre | Valeur | Explication |
+|-----------|--------|-------------|
+| `pop_size` | 30 | Nombre d'individus (solutions) dans la population |
+| `generations` | 100 | Nombre maximum de generations (iterations) |
+| `cx_rate` | 0.9 (90%) | Taux de crossover : probabilite de croiser 2 parents pour creer un enfant |
+| `mut_rate` | 0.2 (20%) | Taux de mutation : probabilite de modifier une solution (swap 2 taches) |
+| `early_stop` | 20 | Arret si pas d'amelioration pendant 20 generations |
+| `seed` | 42 | Graine aleatoire pour reproductibilite |
+
+- **Selection** : Tournoi de taille 3 (on prend 3 individus au hasard, on garde le meilleur)
+- **Crossover** : PPX (Precedence Preserving Crossover) - croise 2 parents en respectant l'ordre
+- **Mutation** : Swap de 2 taches + reparation si precedence violee
+- **Elitisme** : On garde les 10% meilleurs de chaque generation
+
+### SA - Recuit Simule (`sa.py`)
+
+| Parametre | Valeur | Explication |
+|-----------|--------|-------------|
+| `iters` | 2000 | Nombre total d'iterations |
+| `t0` | 200.0 | Temperature initiale (haute = explore beaucoup au debut) |
+| `alpha` | 0.995 | Facteur de refroidissement (T = T * 0.995 a chaque iteration) |
+| `seed` | 42 | Graine aleatoire pour reproductibilite |
+
+- **Voisinage** : Swap de 2 taches aleatoires + reparation precedence
+- **Acceptation** : Si le voisin est meilleur, on l'accepte toujours. Sinon, on l'accepte avec probabilite exp(-delta/T). Quand T est haute, on accepte souvent les degradations. Quand T est basse, on n'accepte presque plus.
+
+### ACO - Colonie de Fourmis (`aco.py`)
+
+| Parametre | Valeur | Explication |
+|-----------|--------|-------------|
+| `n_ants` | 30 | Nombre de fourmis (chacune construit une solution complete) |
+| `iterations` | 100 | Nombre de cycles de fourmis |
+| `evap_rate` | 0.3 (30%) | Taux d'evaporation des pheromones (oubli progressif) |
+| `alpha` | 1.0 | Importance des pheromones dans le choix |
+| `beta` | 2.0 | Importance de l'heuristique (duree courte = prioritaire) |
+| `seed` | 42 | Graine aleatoire pour reproductibilite |
+
+- **Construction** : Chaque fourmi choisit la prochaine tache en fonction des pheromones et de l'heuristique (taches courtes preferees)
+- **Mise a jour** : Les pheromones sont evaporees puis renforcees sur le meilleur chemin trouve
+
+### TABU - Recherche Tabou (`tabu.py`)
+
+| Parametre | Valeur | Explication |
+|-----------|--------|-------------|
+| `max_iters` | 500 | Nombre total d'iterations |
+| `tabu_tenure` | 15 | Taille de la liste tabou (les 15 derniers mouvements sont interdits) |
+| `n_neighbors` | 20 | Nombre de voisins generes a chaque iteration |
+| `seed` | 42 | Graine aleatoire pour reproductibilite |
+
+- **Voisinage** : 20 swaps aleatoires sont testes a chaque iteration
+- **Liste tabou** : Les 15 derniers swaps (i,j) effectues sont interdits pour eviter de boucler
+- **Aspiration** : Si un mouvement tabou donne un resultat meilleur que le record global, il est quand meme accepte
+
+---
+
 ## Comparaison Finale : Quel est le meilleur algorithme ?
 
 Apres execution sur 1000 taches, voici les resultats :
 
 | Rang | Algorithme | Makespan | Heures | Runtime | Forces | Faiblesses |
 |------|-----------|----------|--------|---------|--------|------------|
-| 1 | **TABU** | 32,238 min | 537h | 74.7s | Meilleur makespan, exploration locale efficace, evite les cycles | Plus lent (plus de calculs par iteration) |
-| 2 | **SA** | 37,212 min | 620h | 18.5s | Tres bon makespan, rapide, bon equilibre exploration/exploitation | Resultat depend du refroidissement |
-| 3 | **GA** | 43,869 min | 731h | 26.1s | Bonne diversite, amelioration continue par generations | Besoin de plus de generations pour converger |
-| 4 | **ACO** | 48,205 min | 803h | 9.6s | Le plus rapide, simple, inspire de la nature | Convergence la plus lente, moins adapte aux grands problemes |
+| 1 | **TABU** | 32,238 min | 537h | 80.2s | Meilleur makespan, exploration locale efficace, evite les cycles | Plus lent (plus de calculs par iteration) |
+| 2 | **SA** | 37,212 min | 620h | 15.7s | Tres bon makespan, rapide, bon equilibre exploration/exploitation | Resultat depend du refroidissement |
+| 3 | **GA** | 43,869 min | 731h | 23.5s | Bonne diversite, amelioration continue par generations | Besoin de plus de generations pour converger |
+| 4 | **ACO** | 47,978 min | 800h | 208.2s | Resultat ameliore avec 30 fourmis, inspire de la nature | Le plus lent, convergence limitee sur grands problemes |
 
 **Conclusion** : La Recherche Tabou (TABU) donne le meilleur makespan (32,238 min)
 car elle explore methodiquement les voisins a chaque iteration et sa liste tabou

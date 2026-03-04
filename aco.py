@@ -9,7 +9,7 @@ import numpy as np
 from utils import compute_predecessors, decode_schedule
 
 
-def run_aco(tasks_dict, machine_ids, seed=42, n_ants=5, iterations=30,
+def run_aco(tasks_dict, machine_ids, seed=42, n_ants=30, iterations=100,
             evap_rate=0.3, alpha_ph=1.0, beta_ph=2.0):
     """
     Run Ant Colony Optimization.
